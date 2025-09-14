@@ -1,0 +1,183 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb); /* soft blue gradient */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 2rem;
+  background-color: #f0f9ff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  
+}
+
+.navbar h2 {
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #74ebd5, #9face6); /* mint blue → soft purple */
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  margin-top: 2rem;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #9face6, #74ebd5);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Hero Section */
+.hero-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  color: #2c3e50;
+  min-height: 100vh;
+}
+
+.hero-section h3 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  text-shadow: 1px 1px 6px rgba(255, 255, 255, 0.4);
+  transition: transform 0.3s ease;
+}
+
+.hero-section h3:hover {
+  transform: translateY(-5px);
+}
+
+.hero-section p {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  transition: transform 0.3s ease;
+}
+
+.hero-section p:hover {
+  transform: translateY(-5px);
+}
+
+/* Form Section */
+.outer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 100vh;
+}
+
+.formcard {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: min(90%, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.formcard h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.2rem;
+  color: #2c3e50;
+}
+
+.formcard p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.formcard span {
+  text-decoration: underline;
+  cursor: pointer;
+  color: #009688;
+  transition: color 0.2s;
+}
+
+.formcard span:hover {
+  color: #00796b;
+}
+
+/* Inputs & Buttons */
+.formcard input,
+.formcard button {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+}
+
+.formcard input {
+  background: #f0f9ff;
+  color: #2c3e50;
+  outline: none;
+}
+
+.formcard input::placeholder {
+  color: #607d8b;
+}
+
+.formcard button {
+  background: linear-gradient(135deg, #74ebd5, #acb6e5); /* mint blue → lavender */
+  color: #2c3e50;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.formcard button:hover {
+  background: linear-gradient(135deg, #acb6e5, #74ebd5);
+  transform: scale(1.05);
+  color: white;
+}
+
+.forgot {
+  text-align: left;
+  font-size: 0.85rem;
+  color: #009688;
+  cursor: pointer;
+  padding-left: 0.5rem;
+  transition: color 0.2s;
+}
+
+.forgot:hover {
+  color: #00796b;
+}
