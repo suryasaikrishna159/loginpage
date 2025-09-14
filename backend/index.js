@@ -217,7 +217,7 @@ app.post("/api/v1/isauth",userauth,async (req,res)=>{
 })
 
 
-//-----------------------send passwordresetotp----------------------
+//-----------------------send password-reset otp----------------------
 
 app.post("/api/v1/sendpasswordresetotp",async(req,res)=>{
     const {email}=req.body;
@@ -341,5 +341,4 @@ app.get("/api/v1/getdata",async(req,res)=>{
 app.listen(4000,()=>{
     console.log("server started on port 4000");
 })
-
 
