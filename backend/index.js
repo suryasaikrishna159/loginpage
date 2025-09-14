@@ -1,10 +1,14 @@
+require("dotenv").config();
+
 const express=require("express");
 const cors=require("cors");
 const cookieparser=require("cookie-parser");
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken");
+const transporter=require("./config/nodemailer.js");
 
-require("dotenv").config();
+const userauth=require("./middleware/userauth.js");
+
 
 //------------------------------------------------------------------------------------------------------------------------
 
@@ -24,6 +28,7 @@ const users=require("./models/user.js");
 
 //--------------------------------------------------------controllers------------------------------------------------------
 
+//----------------to register------------------------------------
 app.post("/api/v1/register",async (req,res)=>{
 
     const {name,email,password}=req.body;
@@ -52,6 +57,17 @@ app.post("/api/v1/register",async (req,res)=>{
             maxAge: 7*24*60*60*1000
         });
 
+        //sending mail
+        const mailoptions={
+            from:process.env.SENDERS_EMAIL,
+            to:email,
+            subject:"welcome to the website",
+            text:`HELLO ${name} !!Welcome to the website`
+        }
+
+        await transporter.sendMail(mailoptions);
+
+
         return res.json({success:true,msg:"user registered successfully"});
     }
     catch(err){
@@ -62,7 +78,7 @@ app.post("/api/v1/register",async (req,res)=>{
 
 })
 
-
+//----------------------to login-------------------------------
 app.post("/api/v1/login",async (req,res)=>{
     const {email,password}=req.body;
 
@@ -99,6 +115,7 @@ app.post("/api/v1/login",async (req,res)=>{
 
 })
 
+//------------------------------to logout---------------------
 app.post("/api/v1/logout",async (req,res)=>{
 
     try{
@@ -115,6 +132,91 @@ app.post("/api/v1/logout",async (req,res)=>{
         res.json({success:false,msg:err.message});
     }
 })
+
+//-------------------------------to send otp-------------------------
+app.post("/api/v1/sendverifyotp",userauth,async(req,res)=>{
+
+    try{
+        const {userid}=req.body;
+
+        const user=await users.findById(userid);
+
+        if(user.isaccountverified){
+        return res.json({success:false,msg:"user already verified"});
+        }
+
+        const otp=String(Math.floor(100000+Math.random()*100000));
+        user.verifyotp=otp;
+        user.verifyotpexpireat=Date.now()+24*60*60*1000;
+        
+        await user.save();
+
+        const mailoptions={
+            from:process.env.SENDERS_EMAIL,
+            to:user.email,
+            subject:"otp verification",
+            text:`your otp is ${otp}`
+        }
+
+        await transporter.sendMail(mailoptions);
+
+        res.json({success:true,msg:"verification otp sent successfully on your email"});
+    }
+    catch(err){
+        res.json({success:false,msg:err.message});
+    }
+
+})
+
+
+//-------------------------to verify using otp-----------------------------------
+app.post("/api/v1/verifyemail",userauth,async (req,res)=>{
+    
+
+    const {userid,otp}=req.body;
+
+    if(!userid||!otp){
+        return res.json({success:false,msg:"provide credentials"});
+    }
+
+    try{
+
+        const user=await users.findById(userid);
+        if(!user){
+           return res.json({success:false,msg:"User Not Found"});
+        }
+
+        if(user.verifyotp===""||user.verifyotp!==otp){
+            return res.json({success:false,msg:"Invalid OTP"});
+        }
+
+        if(user.verifyotpexpireat<Date.now()){
+            return res.json({success:false,msg:"OTP Expired"});
+        }
+
+        user.isaccountverified=true;
+        user.verifyotp="";
+        user.verifyotpexpireat=0;
+        await user.save();
+
+        res.json({success:true,msg:"user emailID verified successfully"});
+
+    }
+    catch(err){
+        res.json({success:false,msg:err.message});
+    }
+})
+
+//-------------------------------to check authentication---------------------------
+app.post("/api/v1/isauth",userauth,async (req,res)=>{
+    try{
+        res.json({success:true})
+    }catch(err){
+        res.json({success:false,msg:err.message});
+    }
+})
+
+
 
 //----------------------------------------------------------listener-------------------------------------------------------
 app.listen(4000,()=>{
