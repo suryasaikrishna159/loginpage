@@ -217,9 +217,129 @@ app.post("/api/v1/isauth",userauth,async (req,res)=>{
 })
 
 
+//-----------------------send passwordresetotp----------------------
+
+app.post("/api/v1/sendpasswordresetotp",async(req,res)=>{
+    const {email}=req.body;
+    if(!email){
+        return res.json({success:false,msg:"Email Required"});
+    }
+
+    const user=await users.findOne({email});
+
+    if(!user){
+        res.json({success:false,msg:"Invalid User"});
+    }
+
+    try{
+        const otp=String(Math.floor(100000+Math.random()*100000));
+        user.resetotp=otp;
+        user.resetotpexpireat=Date.now()+10*60*1000;
+        
+        await user.save();
+
+        const mailoptions={
+            from:process.env.SENDERS_EMAIL,
+            to:user.email,
+            subject:"password reset otp verification",
+            text:`your password reset otp is ${otp}`
+        }
+
+        await transporter.sendMail(mailoptions);
+
+        res.json({success:true,msg:"password reset otp sent successfully on your email"});
+    }
+    catch(err){
+        res.json({success:false,msg:err.message});
+    }
+})
+
+//--------------------password reset-----------------------------------
+app.post("/api/v1/passwordreset",async (req,res)=>{
+    const {email,otp,newpassword}=req.body;
+    if(!email||!otp||!newpassword){
+        return res.json({success:false,msg:"provide all credentials"});
+    }
+
+    try{
+        const user=await users.findOne({email});
+        if(!user){
+            return res.json({success:false,msg:"User Doesnt Exist"});
+        }
+
+        if(user.resetotp==""||user.resetotp!=otp){
+            return res.json({success:false,msg:"Wrong Otp"});
+        }
+
+        if(user.resetotpexpireat<Date.now()){
+            return res.json({success:false,msg:"OTP Expired"});
+        }
+
+        const hashedpassword= await bcrypt.hash(newpassword,10);
+
+        user.password=hashedpassword;
+        user.resetotp="";
+        user.resetotpexpireat=0;
+
+        await user.save();
+
+        return res.json({success:true,msg:"Password Changed Successfully"});
+        
+    }
+    catch(err){
+        res.json({success:false,msg:err.message});
+    }
+})
+
+//---------------------------------------get user data--------------------------
+
+app.get("/api/v1/getdata",async(req,res)=>{
+
+    //getting userid from token generated at the time of login from cookies
+    const {token}=req.cookies;
+    if(!token){
+        return res.json({success:false,msg:"Not Authorized Login Again"});
+    }
+
+    try{
+        const tokendecode=jwt.verify(token,process.env.JWT_SECRET);
+
+        if(tokendecode.id){
+            req.userid=tokendecode.id;
+        }
+        else{
+            return res.json({success:false,msg:"Not Authorized Login Again"});
+        }
+    }
+    catch(err){
+        res.json({success:false,msg:err.message});
+    }
+
+    //using the userid for getting data
+    const{userid}=req;
+    if(!userid){
+        res.json({success:false,msg:"login to get data"});
+    }
+
+    try{
+        const user=await users.findById(userid);
+
+        res.json({success:true,
+                    userdata:{
+                        name:user.name,
+                        isverified:user.isaccountverified,
+                    }
+        })
+    }
+    catch(err){
+        res.json({success:false,msg:err.message});
+    }
+
+})
 
 //----------------------------------------------------------listener-------------------------------------------------------
 app.listen(4000,()=>{
     console.log("server started on port 4000");
 })
+
 
