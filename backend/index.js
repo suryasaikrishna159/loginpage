@@ -15,7 +15,10 @@ const userauth=require("./middleware/userauth.js");
 const app=express();
 
 //--------------------------------------------------------middleware-------------------------------------------------------
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // your React app URL
+  credentials: true
+}));
 app.use(cookieparser());
 app.use(express.json());
 
@@ -50,11 +53,11 @@ app.post("/api/v1/register",async (req,res)=>{
         
 
         const token=jwt.sign({id:newuser._id},process.env.JWT_SECRET,{expiresIn:"7d"});
-        res.cookie("token",token,{
-            httpOnly:true,
-            secure:process.env.NODE_ENV ==="production",
-            sameSite: process.env.NODE_ENV === "production"?"none":"strict",
-            maxAge: 7*24*60*60*1000
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false, // in dev, must be false (true only with HTTPS)
+            sameSite: "lax", // works better for cross-origin dev
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
         //sending mail
@@ -100,11 +103,11 @@ app.post("/api/v1/login",async (req,res)=>{
         }
 
         const token=jwt.sign({id:emailexists._id},process.env.JWT_SECRET,{expiresIn:"7d"});
-        res.cookie("token",token,{
-            httpOnly:true,
-            secure:process.env.NODE_ENV ==="production",
-            sameSite: process.env.NODE_ENV === "production"?"none":"strict",
-            maxAge: 7*24*60*60*1000
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false, // in dev, must be false (true only with HTTPS)
+            sameSite: "lax", // works better for cross-origin dev
+            maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
         return res.json({success:true,msg:"user loggedin successfully"});
@@ -120,10 +123,10 @@ app.post("/api/v1/logout",async (req,res)=>{
 
     try{
         res.clearCookie("token",{
-            httpOnly:true,
-            secure:process.env.NODE_ENV ==="production",
-            sameSite: process.env.NODE_ENV === "production"?"none":"strict",
-            maxAge: 7*24*60*60*1000
+            httpOnly: true,
+            secure: false, // in dev, must be false (true only with HTTPS)
+            sameSite: "lax", // works better for cross-origin dev
+            maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
         res.json({success:true,msg:"user logged out successfully"});
@@ -324,11 +327,12 @@ app.get("/api/v1/getdata",async(req,res)=>{
     try{
         const user=await users.findById(userid);
 
-        res.json({success:true,
-                    userdata:{
-                        name:user.name,
-                        isverified:user.isaccountverified,
-                    }
+        res.json({
+            success:true,
+            userdata:{
+                name:user.name,
+                isverified:user.isaccountverified,
+            }
         })
     }
     catch(err){

@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useState,useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import axios from "axios"
 import {toast} from "react-toastify"
@@ -11,40 +11,35 @@ const Login = () => {
   const [name,setname]=useState("");
   const [email,setemail]=useState("");
   const [password,setpassword]=useState("");
+
+
+
   
-
-
-
   const submithandler=async (e)=>{
+    e.preventDefault();
     try{
-        e.preventDefault();
-
         if(state==="signup"){
-          const res=await axios.post("http://localhost:4000/api/v1/register",{name,email,password});
-
+          const res=await axios.post("http://localhost:4000/api/v1/register",{name,email,password},{ withCredentials: true });
+          
           if(res.data.success){
             navigate("/");
-            
             toast.success(res.data.msg);
-            
-
           }
           else{
-            toast.error(res.data.msg);
-          }
+              toast.error(res.data.msg);
+            }
         }
         else{
-          const res=await axios.post("http://localhost:4000/api/v1/login",{email,password});
+            const res=await axios.post("http://localhost:4000/api/v1/login",{email,password},{ withCredentials: true });
 
-          if(res.data.success){
+            if(res.data.success){
             navigate("/");
-            
             toast.success(res.data.msg);
-            
           }
           else{
-            toast.error(res.data.msg);
-          }
+              toast.error(res.data.msg);
+            }
+
         }
 
     }
@@ -52,11 +47,6 @@ const Login = () => {
       toast.error(res.data.msg);
     }
   }
-
-
-
-
-
 
   return (
     <div className='outer'>
